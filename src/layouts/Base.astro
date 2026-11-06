@@ -6,7 +6,7 @@ import '@fontsource/inter/700.css';
 import '../styles/global.css';
 import '../styles/seo-pages.css';
 import '../styles/motion.css';
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Icon from '../components/Icon.astro';
 import Seo from '../components/Seo.astro';
 import Sprite from '../components/Sprite.astro';
@@ -24,16 +24,30 @@ interface Props {
 
 const { title, description, keywords, jsonLd } = Astro.props;
 const logoProps = { src: logo, alt: '', width: 72, height: 83, format: 'webp' as const };
+// El logo de la barra es decorativo (el nombre va al lado) y siempre visible: va como fondo con precarga.
+const barLogo = await getImage({ src: logo, width: 72, height: 83, format: 'webp' });
 ---
 <!doctype html>
 <html lang={SITE.locale}>
 <head>
 <meta charset="UTF-8" />
+<style is:inline>
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:page-out .16s ease-in both}
+::view-transition-new(root){animation:page-in .46s cubic-bezier(.16,1,.3,1) both}
+::view-transition-group(topbar){animation:none}
+::view-transition-old(topbar){display:none}
+::view-transition-new(topbar){animation:none}
+@keyframes page-out{to{opacity:0}}
+@keyframes page-in{from{opacity:0;transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){@keyframes page-in{from{opacity:0}}}
+</style>
 <script is:inline>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#ffffff" />
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="preload" as="image" href={barLogo.src} type="image/webp" />
 <Seo title={title} description={description} keywords={keywords} jsonLd={jsonLd} />
 </head>
 <body>
@@ -47,7 +61,7 @@ const logoProps = { src: logo, alt: '', width: 72, height: 83, format: 'webp' as
 </div>
 <header class="topbar">
   <div class="wrap">
-    <a class="brand" href="/"><Image {...logoProps} />{SITE.name}</a>
+    <a class="brand" href="/"><span class="brand-mark" style={`background-image:url("${barLogo.src}")`}></span>{SITE.name}</a>
     <nav class="nav" aria-label="Principal">
       <a href="/#que-es">Qué es</a>
       <a href="/#para-quien">Para quién</a>
@@ -100,7 +114,7 @@ const logoProps = { src: logo, alt: '', width: 72, height: 83, format: 'webp' as
 </footer>
 
 <div class="wa">
-  <div class="wa-panel" id="wa-panel" role="dialog" aria-label="Contacto por WhatsApp" hidden>
+  <div class="wa-panel" id="wa-panel" role="dialog" aria-label="Contacto por WhatsApp" hidden inert>
     <div class="wa-head">
       <div class="wa-avatar"><Icon name="message" /></div>
       <div><strong>{SITE.legalName}</strong><small>En línea - Respuesta inmediata</small></div>

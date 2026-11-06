@@ -31,11 +31,11 @@ export const BENEFITS: [string, string, string][] = [
   ['eye', 'Todo queda registrado', 'Sabes quién entró al sistema y quién modificó cada dato.'],
 ];
 
-export const AUDIENCES = [
-  ['Empresas y oficinas de crédito', 'Que manejan cartera propia y necesitan controlar saldos, mora y recaudo sin depender de hojas de cálculo.'],
-  ['Inversionistas y prestamistas formales', 'Que quieren saber con exactitud cuánto han prestado, cuánto han recibido y cuánto falta por cobrar.'],
-  ['Operaciones con cobradores en calle', 'Con rutas diarias o semanales, donde cada cobro debe quedar registrado en el momento y por quien lo hizo.'],
-  ['Negocios que venden a crédito', 'Que financian a sus propios clientes y deben hacer seguimiento a las cuotas de cada uno.'],
+export const AUDIENCES: [string, string, string][] = [
+  ['Empresas y oficinas de crédito', 'Que manejan cartera propia y necesitan controlar saldos, mora y recaudo sin depender de hojas de cálculo.', 'building'],
+  ['Inversionistas y prestamistas formales', 'Que quieren saber con exactitud cuánto han prestado, cuánto han recibido y cuánto falta por cobrar.', 'coins'],
+  ['Operaciones con cobradores en calle', 'Con rutas diarias o semanales, donde cada cobro debe quedar registrado en el momento y por quien lo hizo.', 'route'],
+  ['Negocios que venden a crédito', 'Que financian a sus propios clientes y deben hacer seguimiento a las cuotas de cada uno.', 'store'],
 ];
 
 export type Feature = { id: string; title: string; heading: string; items: string[]; shots: Shot[] };
@@ -164,6 +164,16 @@ export const FEATURES: Feature[] = [
   },
 ];
 
+export const PAPERLESS = {
+  title: 'Ahorra en papel: la ficha de cobro ahora es virtual',
+  lead: 'Deja de comprar cartulinas y de llenar una ficha por cada cliente. En MiGestor cada abono queda registrado desde el celular del cobrador, y la oficina trabaja con la misma información.',
+  points: [
+    'Sin cartulinas que comprar, repartir ni reponer',
+    'Sin fichas que se pierden, se mojan o se dañan en la ruta',
+    'El saldo se actualiza con cada abono, sin cuentas a mano',
+  ],
+};
+
 export const FACTS: [string, string, string][] = [
   ['9', 'reportes listos para descargar', 'file'],
   ['4', 'frecuencias de pago', 'calendar'],
@@ -179,14 +189,35 @@ export const STEPS: [string, string, string][] = [
   ['Revisa los resultados', 'Dashboard y reportes muestran recaudo, cartera y mora con lo registrado.', 'chart'],
 ];
 
-export const ROLES: [string, string, string, string][] = [
-  ['Dashboard y reportes', 'Sí', 'Según permisos', 'No'],
-  ['Clientes y créditos', 'Sí', 'Según permisos', 'Sus clientes'],
-  ['Registrar cobros', 'Sí', 'Según permisos', 'Sí'],
-  ['Gastos', 'Sí', 'Según permisos', 'Los propios'],
-  ['Usuarios y configuración', 'Sí', 'Según permisos', 'No'],
-  ['Auditoría', 'Sí', 'Según permisos', 'No'],
-];
+export const ROLES_INTRO = 'Crea los usuarios que necesites, asígnales un rol y personaliza sus permisos. Los cobradores se gestionan aparte, con un acceso hecho solo para su trabajo.';
+
+export const ROLE_CARDS = [
+  {
+    name: 'Administrador',
+    summary: 'Tiene acceso total y decide quién entra y qué puede hacer.',
+    icon: 'shield',
+    tone: 'yes',
+    items: ['Crea, edita y desactiva usuarios', 'Asigna a cada usuario su rol', 'Crea roles a la medida de tu empresa', 'Agrega o quita permisos en cada rol'],
+    foot: 'Conserva el acceso total a todos los módulos.',
+  },
+  {
+    name: 'Usuarios',
+    summary: 'Ven y hacen solo lo que permita el rol que les asignes.',
+    icon: 'sliders',
+    tone: 'choice',
+    items: ['Clientes y créditos', 'Cobranza', 'Dashboard y reportes', 'Gastos', 'Auditoría'],
+    note: 'Según su rol',
+    foot: 'Cambias sus permisos cuando lo necesites.',
+  },
+  {
+    name: 'Cobradores',
+    summary: 'Se gestionan aparte, en su propio módulo, y solo tienen acceso a:',
+    icon: 'phone',
+    tone: 'yes',
+    items: ['Registrar pagos', 'Ver sus recaudos', 'Registrar y ver gastos', 'Centro de ayuda'],
+    foot: 'No necesitan un rol: su acceso ya está definido.',
+  },
+] as const;
 
 export const FAQS: { q: string; a: string; shots?: Shot[] }[] = [
   {

@@ -1,6 +1,6 @@
 (function(){
   var btn=document.getElementById('wa-btn'),panel=document.getElementById('wa-panel'),close=document.getElementById('wa-close');
-  function set(open){panel.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-label',open?'Cerrar WhatsApp':'Abrir WhatsApp');btn.querySelector('use').setAttribute('href',open?'#i-x':'#i-message');}
+  function set(open){panel.hidden=!open;panel.inert=!open;btn.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-label',open?'Cerrar WhatsApp':'Abrir WhatsApp');btn.querySelector('use').setAttribute('href',open?'#i-x':'#i-message');}
   btn.addEventListener('click',function(){set(panel.hidden)});
   close.addEventListener('click',function(){set(false);btn.focus()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!panel.hidden){set(false);btn.focus()}});

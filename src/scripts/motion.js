@@ -11,6 +11,12 @@ const PENDING = 'migestor:scroll-to';
 let frame = 0;
 let finish = null;
 
+// Con teclado, el foco pasa a la primera acción del destino.
+function focusFirstAction(container) {
+  const action = container.querySelector('a[href], button:not(:disabled), summary');
+  if (action) action.focus({ preventScroll: true });
+}
+
 function stopScroll() {
   if (frame) cancelAnimationFrame(frame);
   frame = 0;
@@ -19,23 +25,40 @@ function stopScroll() {
   if (done) done();
 }
 
-function scrollToY(y, done) {
+// Con las animaciones del sistema apagadas no se recorre la página: se desvanece y reaparece en el destino.
+function fadeJump(target, done) {
+  const parts = document.querySelectorAll('body > main, body > footer');
+  parts.forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+  const out = [...parts].map((el) => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in', fill: 'forwards' }));
+  Promise.all(out.map((a) => a.finished)).catch(() => {}).then(() => {
+    scrollTo({ top: target, behavior: 'instant' });
+    out.forEach((a) => a.cancel());
+    parts.forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' }));
+    if (done) done();
+  });
+}
+
+function scrollToY(y, done, quiet) {
   stopWheel();
   stopScroll();
   const target = clamp(y, 0, document.documentElement.scrollHeight - innerHeight);
   const from = scrollY;
   const delta = target - from;
-  if (reduce.matches || Math.abs(delta) < 2) {
+  if (Math.abs(delta) < 2 || (quiet && reduce.matches)) {
     scrollTo({ top: target, behavior: 'instant' });
     if (done) done();
     return;
   }
+  if (reduce.matches) {
+    fadeJump(target, done);
+    return;
+  }
   finish = done || null;
-  const duration = clamp(380 + Math.abs(delta) * 0.22, 480, 1050);
+  const duration = clamp(420 + Math.abs(delta) * 0.28, 620, 1500);
   const start = performance.now();
   const tick = (now) => {
     const t = clamp((now - start) / duration, 0, 1);
-    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const eased = (1 - Math.cos(Math.PI * t)) / 2;
     scrollTo({ top: from + delta * eased, behavior: 'instant' });
     if (t < 1) frame = requestAnimationFrame(tick);
     else stopScroll();
@@ -157,6 +180,7 @@ function setupTools(root) {
     panels.forEach((p, i) => {
       p.classList.toggle('is-active', i === next);
       p.classList.remove('is-leaving');
+      p.inert = i !== next;
     });
     const incoming = panels[next];
     incoming.querySelector('.feature-text').animate(
@@ -186,8 +210,12 @@ function setupTools(root) {
     });
     moveThumb();
     if (!pinned) return;
-    if (prev < 0) panels[next].classList.add('is-active');
-    else showPanel(next, prev, next > prev ? 1 : -1);
+    if (prev < 0) {
+      panels[next].classList.add('is-active');
+      panels.forEach((p, i) => {
+        p.inert = i !== next;
+      });
+    } else showPanel(next, prev, next > prev ? 1 : -1);
   }
 
   function spy() {
@@ -217,6 +245,9 @@ function setupTools(root) {
     pinned = canPin.matches && panels.every((p) => p.offsetHeight <= area.clientHeight);
     if (!pinned) root.classList.remove('is-pinned');
     if (pinned && current >= 0) panels[current].classList.add('is-active');
+    panels.forEach((p, i) => {
+      p.inert = pinned && i !== current;
+    });
     moveThumb();
     spy();
   }
@@ -229,11 +260,12 @@ function setupTools(root) {
   function goTo(i, keyboard) {
     locked = true;
     setActive(i);
-    if (keyboard) panels[i].focus({ preventScroll: true });
+    if (keyboard) focusFirstAction(panels[i]);
+    // Solo cambia el contenido de la función: la página nunca se desvanece aquí.
     scrollToY(offsetOf(i), () => {
       locked = false;
       spy();
-    });
+    }, true);
   }
 
   layout();
@@ -256,10 +288,62 @@ function setupTools(root) {
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 
-  return { goTo, indexOf: (id) => panels.findIndex((p) => p.id === id) };
+  // Durante un viaje largo por la página, el panel visible no cambia al pasar por la sección.
+  function hold(on) {
+    locked = on;
+    if (!on) spy();
+  }
+
+  return { goTo, hold, indexOf: (id) => panels.findIndex((p) => p.id === id) };
 }
 
 /* ---------- Enlaces internos: scroll suave y URL sin #seccion ---------- */
+function glideTo(y) {
+  if (toolbar) toolbar.hold(true);
+  scrollToY(y, () => {
+    if (toolbar) toolbar.hold(false);
+  });
+}
+
+// Navegadores sin transición nativa entre páginas: se desvanece a mano.
+const nativePageTransition = 'onpagereveal' in window;
+const ARRIVING = 'migestor:arriving';
+
+function leaveTo(href) {
+  if (nativePageTransition) {
+    location.href = href;
+    return;
+  }
+  try {
+    sessionStorage.setItem(ARRIVING, '1');
+  } catch {
+    // Sin almacenamiento solo se pierde la aparición al llegar.
+  }
+  document.body.classList.add('page-leaving');
+  setTimeout(() => {
+    location.href = href;
+  }, 170);
+}
+
+function playArrival() {
+  let arriving = false;
+  try {
+    arriving = sessionStorage.getItem(ARRIVING) === '1';
+    sessionStorage.removeItem(ARRIVING);
+  } catch {
+    return;
+  }
+  if (!arriving) return;
+  const from = reduce.matches ? 'none' : 'translateY(10px)';
+  document.querySelectorAll('body > main, body > footer').forEach((el) => {
+    el.animate([{ opacity: 0, transform: from }, { opacity: 1, transform: 'none' }], { duration: 460, easing: OUT });
+  });
+}
+playArrival();
+addEventListener('pageshow', (e) => {
+  if (e.persisted) document.body.classList.remove('page-leaving');
+});
+
 function scrollToId(id, keyboard) {
   const index = toolbar ? toolbar.indexOf(id) : -1;
   if (index >= 0) {
@@ -268,11 +352,8 @@ function scrollToId(id, keyboard) {
   }
   const el = document.getElementById(id);
   if (!el) return false;
-  scrollToY(el.getBoundingClientRect().top + scrollY - barHeight());
-  if (keyboard) {
-    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
-    el.focus({ preventScroll: true });
-  }
+  glideTo(el.getBoundingClientRect().top + scrollY - barHeight());
+  if (keyboard) focusFirstAction(el);
   return true;
 }
 
@@ -284,29 +365,35 @@ document.addEventListener('click', (e) => {
   if (url.origin !== location.origin) return;
   const id = decodeURIComponent(url.hash.slice(1));
   if (url.pathname !== location.pathname) {
-    if (!id) return;
-    // Desde otra página: se guarda el destino para que la URL llegue limpia.
-    try {
-      sessionStorage.setItem(PENDING, id);
-    } catch {
+    if (id) {
+      // Desde otra página: se guarda el destino para que la URL llegue limpia.
+      try {
+        sessionStorage.setItem(PENDING, id);
+      } catch {
+        return;
+      }
+    } else if (nativePageTransition) {
       return;
     }
     e.preventDefault();
-    location.href = url.pathname;
+    leaveTo(id ? url.pathname : url.href);
     return;
   }
   e.preventDefault();
-  if (!id) scrollToY(0);
+  if (e.detail > 0) link.blur(); // Con el mouse no queda el recuadro de foco; con el teclado sí.
+  if (!id) glideTo(0);
   else if (!scrollToId(id, e.detail === 0)) location.hash = id;
 });
 
 const toTop = document.getElementById('to-top');
-if (toTop) toTop.addEventListener('click', () => scrollToY(0));
+if (toTop) toTop.addEventListener('click', () => glideTo(0));
 
 function consumePendingTarget() {
   let id = '';
+  let arrivedFromPage = false;
   try {
     id = sessionStorage.getItem(PENDING) || '';
+    arrivedFromPage = Boolean(id);
     sessionStorage.removeItem(PENDING);
   } catch {
     // Almacenamiento bloqueado: se usa solo el hash de la URL.
@@ -315,7 +402,7 @@ function consumePendingTarget() {
     id = id || decodeURIComponent(location.hash.slice(1));
     history.replaceState(history.state, '', location.pathname + location.search);
   }
-  if (id) requestAnimationFrame(() => scrollToId(id));
+  if (id) setTimeout(() => scrollToId(id), arrivedFromPage ? 260 : 0);
 }
 consumePendingTarget();
 addEventListener('hashchange', consumePendingTarget);
@@ -324,6 +411,8 @@ addEventListener('hashchange', consumePendingTarget);
 function setupFaq(faq) {
   const items = [...faq.querySelectorAll('details')];
   const motions = new Map();
+  const FAQ_MS = 480;
+  const FAQ_EASE = 'cubic-bezier(.4,0,.2,1)';
   let keepFrame = 0;
 
   function run(item, opening) {
@@ -338,25 +427,31 @@ function setupFaq(faq) {
       if (!opening) item.open = false;
       item.classList.remove('closing');
     };
-    if (reduce.matches) {
-      finished();
-      return;
-    }
     body.style.overflow = 'hidden';
     const motion = body.animate(
-      [{ height: `${from}px`, opacity: opening ? 0 : 1 }, { height: `${opening ? body.scrollHeight : 0}px`, opacity: opening ? 1 : 0 }],
-      { duration: opening ? 380 : 260, easing: 'cubic-bezier(.22,1,.36,1)' },
+      [{ height: `${from}px` }, { height: `${opening ? body.scrollHeight : 0}px` }],
+      { duration: FAQ_MS, easing: FAQ_EASE },
     );
     motion.onfinish = finished;
     motions.set(item, motion);
+    // El contenido se desvanece mientras la altura cambia, un poco después al abrir y antes al cerrar.
+    [...body.children].forEach((child) => {
+      child.getAnimations().forEach((a) => a.cancel());
+      const shift = reduce.matches ? 0 : 10;
+      child.animate(
+        opening
+          ? [{ opacity: 0, transform: `translateY(${-shift}px)` }, { opacity: 1, transform: 'none' }]
+          : [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateY(${-shift}px)` }],
+        { duration: opening ? FAQ_MS - 60 : FAQ_MS - 180, delay: opening ? 60 : 0, easing: 'ease-out', fill: 'both' },
+      ).onfinish = (e) => e.target.cancel();
+    });
   }
 
   // Al cerrarse una pregunta de arriba, la pregunta tocada no debe salirse de su lugar.
   function keepInPlace(anchor) {
     cancelAnimationFrame(keepFrame);
-    if (reduce.matches) return;
     let last = anchor.getBoundingClientRect().top;
-    const until = performance.now() + 420;
+    const until = performance.now() + FAQ_MS + 40;
     const tick = (now) => {
       const y = anchor.getBoundingClientRect().top;
       if (y !== last) scrollBy({ top: y - last, behavior: 'instant' });
@@ -382,6 +477,35 @@ function setupFaq(faq) {
   });
 }
 document.querySelectorAll('.faq').forEach(setupFaq);
+
+/* ---------- Sin papel: la X se dibuja sobre la ficha al llegar ---------- */
+const paper = document.querySelector('.paper');
+if (paper) {
+  if ('IntersectionObserver' in window) {
+    const paperObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      paperObserver.disconnect();
+      paper.classList.add('is-in');
+    }, { threshold: 0.4 });
+    paperObserver.observe(paper);
+  } else {
+    paper.classList.add('is-in');
+  }
+}
+
+/* ---------- Soluciones: aparecen en orden al llegar ---------- */
+const audiences = document.querySelector('.audiences');
+if (audiences && 'IntersectionObserver' in window) {
+  const audienceObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    audienceObserver.disconnect();
+    [...audiences.children].forEach((card, i) => {
+      const from = reduce.matches ? 'none' : 'translateY(22px)';
+      card.animate([{ opacity: 0, transform: from }, { opacity: 1, transform: 'none' }], { duration: 640, delay: i * 90, easing: OUT, fill: 'backwards' });
+    });
+  });
+  audienceObserver.observe(audiences);
+}
 
 /* ---------- Cifras y pasos ---------- */
 const facts = document.querySelector('.facts');
@@ -420,3 +544,10 @@ if ('IntersectionObserver' in window) {
 } else {
   if (steps) steps.classList.add('is-lit');
 }
+
+/* ---------- Al primer scroll, la luz de las capturas termina para no competir con el movimiento ---------- */
+addEventListener('scroll', () => {
+  document.querySelectorAll('.screen').forEach((screen) => {
+    screen.getAnimations({ subtree: true }).forEach((animation) => animation.finish());
+  });
+}, { passive: true, once: true });

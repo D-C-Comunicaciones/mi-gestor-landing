@@ -32,6 +32,8 @@ export const SECONDARY_KEYWORDS = [
   'gestión de cobradores',
   'rutas de cobro',
   'app para cobradores',
+  'ficha de cobro digital',
+  'reemplazar fichas de cobro en papel',
 ];
 
 /** Búsquedas según lo que la persona quiere lograr. */

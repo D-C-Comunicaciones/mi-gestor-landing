@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { AUDIENCES, FAQS, FEATURES } from '../data/content';
+import { AUDIENCES, FAQS, FEATURES, PAPERLESS } from '../data/content';
 import { FEATURE_SEO } from '../data/feature-seo';
 import { SITE, WHATSAPP_URL } from '../data/site';
 
@@ -15,6 +15,12 @@ export const GET: APIRoute = ({ site }) => {
     '## Para quién es',
     '',
     ...AUDIENCES.map(([title, text]) => `- ${title}: ${text}`),
+    '',
+    '## Ficha de cobro virtual',
+    '',
+    PAPERLESS.lead,
+    '',
+    ...PAPERLESS.points.map((point) => `- ${point}`),
     '',
     '## Funciones',
     '',

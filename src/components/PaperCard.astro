@@ -1,0 +1,65 @@
+---
+// Ficha de cobro en cartulina, redibujada a partir de la que usan las operaciones en calle.
+const INK = '#23452a';
+const ROW_H = 18.5;
+const TABLE_Y = 212;
+const columns = [
+  { x: 22, n: 1 },
+  { x: 204, n: 13 },
+];
+const headers = [
+  { label: 'FECHA', dx: 28, w: 54 },
+  { label: 'ABONO', dx: 82, w: 48 },
+  { label: 'SALDO', dx: 130, w: 44 },
+];
+const box = 'fill:rgb(255 255 255/.22)';
+---
+<svg class="paper-sheet" viewBox="0 0 400 560" role="img" aria-label="Ficha de cobro en cartulina, con casillas para anotar a mano cada abono" font-family="Inter,Arial,sans-serif" font-weight="700" fill={INK}>
+  <rect width="400" height="560" fill="#a8e3a1" />
+  <g stroke={INK} stroke-width="1.4" fill="none">
+    <rect x="22" y="22" width="150" height="34" rx="5" style={box} />
+    <rect x="178" y="22" width="200" height="34" rx="7" style={box} />
+    <rect x="22" y="62" width="356" height="28" rx="6" style={box} />
+    <rect x="22" y="96" width="356" height="28" rx="6" style={box} />
+    <rect x="22" y="130" width="356" height="28" rx="6" style={box} />
+    <rect x="22" y="164" width="150" height="36" rx="6" style={box} />
+    <rect x="178" y="164" width="200" height="36" rx="6" style={box} />
+    <path d="M72 22v34M122 22v34" />
+  </g>
+  <rect x="22" y="22" width="150" height="10" rx="3" fill={INK} />
+  <g fill="#e9f8e6" font-size="7" text-anchor="middle"><text x="47" y="30">DÍA</text><text x="97" y="30">MES</text><text x="147" y="30">AÑO</text></g>
+  <text x="185" y="47" font-size="18">$</text>
+  <g font-size="11">
+    <text x="30" y="80">SEÑOR</text>
+    <text x="30" y="114">DIRECCIÓN</text>
+    <text x="30" y="148">BARRIO</text>
+    <text x="30" y="180">TEL. / CEL.</text>
+  </g>
+  <rect x="178" y="164" width="200" height="14" rx="4" fill={INK} />
+  <text x="278" y="175" font-size="10" fill="#e9f8e6" text-anchor="middle">CUOTA DIARIA</text>
+  <text x="185" y="196" font-size="15">$</text>
+
+  {columns.map(({ x, n }) => (
+    <g>
+      <rect x={x} y={TABLE_Y} width="174" height="18" fill={INK} />
+      <g fill="#e9f8e6" font-size="9" text-anchor="middle">
+        <text x={x + 14} y={TABLE_Y + 13}>#</text>
+        {headers.map((h) => <text x={x + h.dx + h.w / 2} y={TABLE_Y + 13}>{h.label}</text>)}
+      </g>
+      {Array.from({ length: 12 }, (_, i) => {
+        const y = TABLE_Y + 18 + i * ROW_H;
+        return (
+          <g>
+            <rect x={x} y={y} width="174" height={ROW_H} fill="none" stroke={INK} stroke-width=".8" />
+            <path d={`M${x + 28} ${y}v${ROW_H}M${x + 82} ${y}v${ROW_H}M${x + 130} ${y}v${ROW_H}`} stroke={INK} stroke-width=".8" />
+            <text x={x + 14} y={y + 13.5} font-size="10" text-anchor="middle">{n + i}</text>
+          </g>
+        );
+      })}
+    </g>
+  ))}
+
+  <rect x="22" y="470" width="356" height="62" rx="7" fill="rgb(255 255 255/.14)" stroke={INK} stroke-width="1.2" />
+  <text x="200" y="512" font-size="36" text-anchor="middle" letter-spacing="5" fill="#d7f2d2">ACEPTADO</text>
+  <text x="32" y="526" font-size="8">C.C. No.</text>
+</svg>

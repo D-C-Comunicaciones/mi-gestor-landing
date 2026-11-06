@@ -2,12 +2,13 @@
 import Base from '../layouts/Base.astro';
 import CtaRelief from '../components/CtaRelief.astro';
 import FaqList from '../components/FaqList.astro';
+import PaperCard from '../components/PaperCard.astro';
 import Icon from '../components/Icon.astro';
 import WhatsappLink from '../components/WhatsappLink.astro';
 import Zoomable from '../components/Zoomable.astro';
 import { Image } from 'astro:assets';
 import logo from '../assets/brand/logo.png';
-import { AUDIENCES, BENEFITS, FACTS, FAQS, FEATURES, ROLES, SHOTS, STEPS } from '../data/content';
+import { AUDIENCES, BENEFITS, FACTS, FAQS, FEATURES, PAPERLESS, ROLE_CARDS, ROLES_INTRO, SHOTS, STEPS } from '../data/content';
 import { HOME_KEYWORDS } from '../data/keywords';
 import { faqSchema, graph, organizationSchema, softwareSchema, websiteSchema } from '../lib/schema';
 
@@ -62,22 +63,59 @@ const jsonLd = graph([organizationSchema(site), websiteSchema(site), softwareSch
     </div>
   </section>
 
-  <section class="tinted" id="para-quien">
+  <section class="tinted audiences-section" id="para-quien">
     <div class="wrap center">
       <h2>Soluciones para cada tipo de operación</h2>
       <p class="lead">Nos adaptamos a tu modelo de negocio y a las líneas de crédito que manejes.</p>
       <div class="audiences">
-        {AUDIENCES.map(([t, d]) => <div><h3>{t}</h3><p>{d}</p></div>)}
+        {AUDIENCES.map(([t, d, icon]) => (
+          <div class="audience">
+            <span class="audience-ghost"><Icon name={icon} size={132} /></span>
+            <span class="audience-icon"><Icon name={icon} size={24} /></span>
+            <h3>{t}</h3>
+            <p>{d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="paper" id="sin-papel">
+    <div class="wrap paper-grid">
+      <div>
+        <h2>{PAPERLESS.title}</h2>
+        <p class="lead">{PAPERLESS.lead}</p>
+        <ul class="paper-points">
+          {PAPERLESS.points.map((point) => <li><Icon name="check-circle" size={20} /><span>{point}</span></li>)}
+        </ul>
+        <WhatsappLink label="Quiero dejar el papel" cls="btn-primary btn-lg paper-cta" />
+      </div>
+      <div class="paper-visual">
+        <div class="paper-side">
+          <div class="paper-card">
+            <PaperCard />
+            <svg class="paper-x" viewBox="0 0 400 560" aria-hidden="true">
+              <path pathLength="1" d="M26 30 374 530" />
+              <path pathLength="1" d="M374 30 26 530" />
+            </svg>
+          </div>
+          <span class="paper-tag paper-tag-old"><Icon name="x" size={15} /><b>Antes</b><span>cartulina</span></span>
+        </div>
+        <span class="paper-arrow"><Icon name="arrow-right" size={22} /></span>
+        <div class="paper-side">
+          <Zoomable shot={SHOTS.movil} cls="paper-phone" zoom={false} sizes="190px" />
+          <span class="paper-tag paper-tag-new"><Icon name="check-circle" size={16} /><b>Ahora</b><span>en el celular</span></span>
+        </div>
       </div>
     </div>
   </section>
 
   <section id="funciones" class="tools-section">
-    <div class="wrap center">
-      <h2>Herramientas que lo hacen todo más fácil</h2>
-    </div>
     <div class="tools" id="tools" style={`--n:${FEATURES.length}`}>
       <div class="tools-stage">
+        <div class="wrap center tools-head">
+          <h2>Herramientas que lo hacen todo más fácil</h2>
+        </div>
         <div class="tools-nav">
           <div class="wrap">
             <nav class="pills" aria-label="Módulos">
@@ -88,13 +126,15 @@ const jsonLd = graph([organizationSchema(site), websiteSchema(site), softwareSch
         </div>
         <div class="wrap tools-panels">
         {FEATURES.map((f) => (
-          <article class="feature" id={f.id} tabindex="-1">
+          <article class="feature" id={f.id}>
             <div class="feature-text">
               <p class="lockup"><Image src={logo} alt="" width={48} height={55} format="webp" />MiGestor <b>{f.title}</b></p>
               <h3>{f.heading}</h3>
               <ul>{f.items.map((i) => <li><Icon name="check-circle" size={18} /><span>{i}</span></li>)}</ul>
-              <WhatsappLink label="Más información" cls="btn-outline" size={16} />
-              <a class="feature-more" href={`/funciones/${f.id}/`}>Ver {f.title.toLowerCase()} en detalle <Icon name="arrow-right" size={16} /></a>
+              <div class="feature-actions">
+                <WhatsappLink label="Más información" cls="btn-outline" size={16} />
+                <a class="feature-more" href={`/funciones/${f.id}/`}><span>Ver {f.title.toLowerCase()} en detalle</span><Icon name="arrow-right" size={16} /></a>
+              </div>
             </div>
             <div class="shots">{f.shots.map((s) => <Zoomable shot={s} />)}</div>
           </article>
@@ -131,16 +171,33 @@ const jsonLd = graph([organizationSchema(site), websiteSchema(site), softwareSch
     </div>
   </section>
 
-  <section class="tinted">
-    <div class="wrap roles-grid">
-      <div>
-        <h2>Cada persona ve lo que le corresponde</h2>
-        <p class="lead">El administrador entra a todo. Tú decides qué puede hacer cada colaborador y el cobrador trabaja solo con lo suyo.</p>
-      </div>
-      <table class="roles">
-        <thead><tr><th scope="col">Área</th><th scope="col">Administrador</th><th scope="col">Colaborador</th><th scope="col">Cobrador</th></tr></thead>
-        <tbody>{ROLES.map(([a, b, c, d]) => <tr><th scope="row">{a}</th><td data-label="Administrador">{b}</td><td data-label="Colaborador">{c}</td><td data-label="Cobrador">{d}</td></tr>)}</tbody>
-      </table>
+  <section class="tinted roles-section">
+    <div class="wrap center">
+      <h2>Cada persona ve lo que le corresponde</h2>
+      <p class="lead">{ROLES_INTRO}</p>
+      <ul class="role-cards">
+        {ROLE_CARDS.map((role) => (
+          <li class="role-card">
+            <div class="role-head">
+              <span class="role-icon"><Icon name={role.icon} size={24} /></span>
+              <div>
+                <h3>{role.name}</h3>
+                <p>{role.summary}</p>
+              </div>
+            </div>
+            <ul class="role-areas">
+              {role.items.map((item) => (
+                <li class={`role-area is-${role.tone}`}>
+                  <span class="role-mark"><Icon name={role.tone === 'choice' ? 'sliders' : 'check'} size={14} /></span>
+                  <span class="role-name">{item}</span>
+                  {'note' in role && <span class="role-note">{role.note}</span>}
+                </li>
+              ))}
+            </ul>
+            <p class="role-foot">{role.foot}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
