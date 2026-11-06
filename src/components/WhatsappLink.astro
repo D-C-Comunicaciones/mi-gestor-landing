@@ -1,0 +1,12 @@
+---
+import Icon from './Icon.astro';
+import { WHATSAPP_URL } from '../data/site';
+
+interface Props {
+  label: string;
+  cls: string;
+  size?: number;
+}
+const { label, cls, size = 18 } = Astro.props;
+---
+<a class={`btn ${cls}`} href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"><Icon name="message" size={size} />{label}</a>

@@ -1,0 +1,29 @@
+/* Elementos nuevos de este proyecto; los estilos migrados de la landing están en global.css. */
+.foot-seo{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr))}
+.feature-more{display:inline-flex;align-items:center;gap:6px;margin-top:14px;margin-left:16px;font-size:15px;font-weight:600;color:var(--brand);text-decoration:none}
+.feature-more:hover{color:var(--brand-hover);text-decoration:underline;text-underline-offset:3px}
+
+.crumbs{font-size:14px;color:var(--muted)}
+.crumbs ol{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0}
+.crumbs li+li::before{content:"/";margin-right:6px;color:#a8a29e}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+
+.module-hero{padding-block:clamp(32px,4vw,56px);background:radial-gradient(45% 80% at 95% 10%,#ecfccb 0,transparent 100%),radial-gradient(38% 70% at 4% 60%,#f7fee7 0,transparent 100%),#fff}
+.module-hero h1{margin-top:16px;font-size:clamp(2rem,4vw,3rem)}
+.module-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,64px);align-items:center;margin-top:8px}
+.module-grid .btn{margin-top:24px}
+.module-includes h2{font-size:clamp(1.4rem,2.2vw,1.75rem)}
+.module-includes ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 32px;margin-top:24px}
+.module-includes li{display:flex;gap:10px;font-size:15px;line-height:1.45}
+.module-includes li .icon{color:var(--brand);margin-top:2px}
+.module-faq{padding-top:0}
+.module-faq .faq{margin-top:24px}
+
+.related ul{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;list-style:none;padding:0;margin-top:24px}
+.related a{display:block;padding:7px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:500;background:#fff;text-decoration:none}
+.related a:hover{border-color:var(--brand-mark);color:var(--brand-ink)}
+
+@media (max-width:1180px){.foot-seo{grid-template-columns:repeat(2,minmax(0,1fr))}.foot-seo>div:first-child{grid-column:1/-1}}
+@media (max-width:860px){.module-grid{grid-template-columns:minmax(0,1fr)}.module-includes ul{grid-template-columns:minmax(0,1fr)}.feature-more{margin-left:0;display:flex}}
+@media (max-width:640px){.module-grid .btn{width:100%}}

@@ -1,0 +1,20 @@
+---
+import Zoomable from './Zoomable.astro';
+import type { FAQS } from '../data/content';
+
+interface Props {
+  faqs: typeof FAQS;
+}
+const { faqs } = Astro.props;
+---
+<div class="faq">
+  {faqs.map(({ q, a, shots }) => (
+    <details>
+      <summary>{q}<svg class="icon" width="20" height="20" aria-hidden="true"><use href="#i-chevron" /></svg></summary>
+      <div class="faq-body">
+        <p>{a}</p>
+        {shots && <div class="shots faq-shots">{shots.map((s) => <Zoomable shot={s} />)}</div>}
+      </div>
+    </details>
+  ))}
+</div>

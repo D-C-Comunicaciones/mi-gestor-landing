@@ -1,0 +1,162 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaRelief from '../components/CtaRelief.astro';
+import FaqList from '../components/FaqList.astro';
+import Icon from '../components/Icon.astro';
+import WhatsappLink from '../components/WhatsappLink.astro';
+import Zoomable from '../components/Zoomable.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/logo.png';
+import { AUDIENCES, BENEFITS, FACTS, FAQS, FEATURES, ROLES, SHOTS, STEPS } from '../data/content';
+import { HOME_KEYWORDS } from '../data/keywords';
+import { faqSchema, graph, organizationSchema, softwareSchema, websiteSchema } from '../lib/schema';
+
+const title = 'Software de créditos y cobranza en Colombia | MiGestor';
+const description = 'MiGestor es la plataforma para empresas de crédito: clientes, créditos, cobranza, cobradores en ruta, gastos, reportes, auditoría y permisos en un solo lugar.';
+const site = Astro.site!;
+const jsonLd = graph([organizationSchema(site), websiteSchema(site), softwareSchema(site, description), faqSchema(FAQS)]);
+---
+<Base title={title} description={description} keywords={HOME_KEYWORDS} jsonLd={jsonLd}>
+  <section class="hero">
+    <div class="wrap center">
+      <p class="hero-tag">Software de gestión para empresas de crédito y cobranza</p>
+      <h1>Tus créditos, recaudos y cobradores<br /><span class="accent">en un solo lugar</span></h1>
+      <p class="lead">MiGestor tiene lo que necesitas para manejar tu operación: desde crear al cliente y simular su plan de pagos, hasta registrar cada cobro en ruta y ver el estado real de tu cartera.</p>
+      <div class="hero-cta">
+        <WhatsappLink label="Quiero más información" cls="btn-primary btn-lg" />
+        <a class="btn btn-outline btn-lg" href="#funciones">Ver funciones</a>
+      </div>
+      <p class="hero-notes">
+        <span><Icon name="check-circle" size={16} />Se adapta a tus líneas de crédito</span>
+        <span><Icon name="check-circle" size={16} />Oficina y cobradores en la misma información</span>
+      </p>
+    </div>
+    <div class="stage">
+      <Zoomable shot={SHOTS.vencidas} cls="screen screen-left" zoom={false} decorative eager sizes="(max-width: 860px) 1px, 470px" />
+      <Zoomable shot={SHOTS.reportes} cls="screen screen-right" zoom={false} decorative eager sizes="(max-width: 860px) 1px, 470px" />
+      <Zoomable shot={SHOTS.dashboard} cls="screen screen-main" zoom={false} priority sizes="(max-width: 860px) 86vw, 720px" />
+      <Zoomable shot={SHOTS.movil} cls="screen screen-phone" zoom={false} eager sizes="190px" />
+    </div>
+  </section>
+
+  <section id="que-es">
+    <div class="wrap center">
+      <h2>Haz tu operación de crédito más simple:<br />desde donde estés</h2>
+      <p class="lead">MiGestor reúne en una sola plataforma lo que muchas operaciones llevan en cuadernos, hojas de cálculo y mensajes: quién debe, cuánto debe, cuándo paga y quién le cobra.</p>
+      <ul class="benefits">
+        {BENEFITS.map(([i, t, d]) => <li><span class="benefit-icon"><Icon name={i} size={22} /></span><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="spotlight">
+        <div>
+          <h2>Simula el crédito y créalo en un solo paso</h2>
+          <p class="lead">La calculadora está disponible en todo momento. Escoge el tipo y los montos, revisa el plan de pagos y crea el crédito: los datos quedan listos y solo eliges el cliente.</p>
+          <WhatsappLink label="Quiero verla en acción" cls="btn-primary" />
+        </div>
+        <Zoomable shot={SHOTS.calculadora} />
+      </div>
+    </div>
+  </section>
+
+  <section class="tinted" id="para-quien">
+    <div class="wrap center">
+      <h2>Soluciones para cada tipo de operación</h2>
+      <p class="lead">Nos adaptamos a tu modelo de negocio y a las líneas de crédito que manejes.</p>
+      <div class="audiences">
+        {AUDIENCES.map(([t, d]) => <div><h3>{t}</h3><p>{d}</p></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section id="funciones" class="tools-section">
+    <div class="wrap center">
+      <h2>Herramientas que lo hacen todo más fácil</h2>
+    </div>
+    <div class="tools" id="tools" style={`--n:${FEATURES.length}`}>
+      <div class="tools-stage">
+        <div class="tools-nav">
+          <div class="wrap">
+            <nav class="pills" aria-label="Módulos">
+              <span class="pills-thumb" aria-hidden="true"></span>
+              {FEATURES.map((f, i) => <a href={`#${f.id}`} class={i === 0 ? 'active' : undefined}>{f.title}</a>)}
+            </nav>
+          </div>
+        </div>
+        <div class="wrap tools-panels">
+        {FEATURES.map((f) => (
+          <article class="feature" id={f.id} tabindex="-1">
+            <div class="feature-text">
+              <p class="lockup"><Image src={logo} alt="" width={48} height={55} format="webp" />MiGestor <b>{f.title}</b></p>
+              <h3>{f.heading}</h3>
+              <ul>{f.items.map((i) => <li><Icon name="check-circle" size={18} /><span>{i}</span></li>)}</ul>
+              <WhatsappLink label="Más información" cls="btn-outline" size={16} />
+              <a class="feature-more" href={`/funciones/${f.id}/`}>Ver {f.title.toLowerCase()} en detalle <Icon name="arrow-right" size={16} /></a>
+            </div>
+            <div class="shots">{f.shots.map((s) => <Zoomable shot={s} />)}</div>
+          </article>
+        ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="MiGestor en cifras">
+    <div class="wrap">
+      <ul>{FACTS.map(([n, t, icon], i) => (
+        <li style={`--i:${i}`}>
+          <span class="fact-icon"><Icon name={icon} size={24} /></span>
+          <b data-count={n}>{n}</b>
+          <span class="fact-label">{t}</span>
+        </li>
+      ))}</ul>
+    </div>
+  </section>
+
+  <section id="como-funciona">
+    <div class="wrap center">
+      <h2>Del primer cliente al reporte</h2>
+      <ol class="steps">
+        {STEPS.map(([t, d, icon], i) => (
+          <li style={`--i:${i}`}>
+            <span class="step-dot"><Icon name={icon} size={22} /><b class="n">{i + 1}</b></span>
+            <h3>{t}</h3>
+            <p>{d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="tinted">
+    <div class="wrap roles-grid">
+      <div>
+        <h2>Cada persona ve lo que le corresponde</h2>
+        <p class="lead">El administrador entra a todo. Tú decides qué puede hacer cada colaborador y el cobrador trabaja solo con lo suyo.</p>
+      </div>
+      <table class="roles">
+        <thead><tr><th scope="col">Área</th><th scope="col">Administrador</th><th scope="col">Colaborador</th><th scope="col">Cobrador</th></tr></thead>
+        <tbody>{ROLES.map(([a, b, c, d]) => <tr><th scope="row">{a}</th><td data-label="Administrador">{b}</td><td data-label="Colaborador">{c}</td><td data-label="Cobrador">{d}</td></tr>)}</tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="preguntas">
+    <div class="wrap center">
+      <h2>Explora las preguntas frecuentes</h2>
+      <FaqList faqs={FAQS} />
+    </div>
+  </section>
+
+  <section class="cta">
+    <CtaRelief />
+    <div class="wrap center">
+      <h2>Conoce MiGestor para tu operación</h2>
+      <p class="lead">Escríbenos por WhatsApp y te contamos todo lo que el producto puede hacer por tu negocio.</p>
+      <WhatsappLink label="Escribir por WhatsApp" cls="btn-wa btn-lg" />
+    </div>
+  </section>
+</Base>

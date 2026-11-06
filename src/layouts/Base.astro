@@ -1,0 +1,141 @@
+---
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '../styles/global.css';
+import '../styles/seo-pages.css';
+import '../styles/motion.css';
+import { Image } from 'astro:assets';
+import Icon from '../components/Icon.astro';
+import Seo from '../components/Seo.astro';
+import Sprite from '../components/Sprite.astro';
+import WhatsappLink from '../components/WhatsappLink.astro';
+import { FEATURES } from '../data/content';
+import { LOGIN_URL, SITE, WHATSAPP_URL } from '../data/site';
+import logo from '../assets/brand/logo.png';
+
+interface Props {
+  title: string;
+  description: string;
+  keywords?: string[];
+  jsonLd?: object;
+}
+
+const { title, description, keywords, jsonLd } = Astro.props;
+const logoProps = { src: logo, alt: '', width: 72, height: 83, format: 'webp' as const };
+---
+<!doctype html>
+<html lang={SITE.locale}>
+<head>
+<meta charset="UTF-8" />
+<script is:inline>document.documentElement.classList.add('js')</script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<Seo title={title} description={description} keywords={keywords} jsonLd={jsonLd} />
+</head>
+<body>
+<Sprite />
+<div class="announce">
+  <div class="wrap">
+    <span class="ann-new"><Icon name="sparkles" size={18} /><span class="ann-badge">Nuevo</span>Simula y crea tus créditos desde la calculadora</span>
+    <a class="ann-pill" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Pide información <Icon name="arrow-right" size={16} /></a>
+    <span><span class="ann-text">¿Quieres saber más? Escríbenos sin compromiso al </span><a class="ann-phone-link" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"><Icon name="message" size={16} />{SITE.phoneLabel}</a></span>
+  </div>
+</div>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="/"><Image {...logoProps} />{SITE.name}</a>
+    <nav class="nav" aria-label="Principal">
+      <a href="/#que-es">Qué es</a>
+      <a href="/#para-quien">Para quién</a>
+      <a href="/#funciones">Funciones</a>
+      <a href="/#como-funciona">Cómo funciona</a>
+      <a href="/#preguntas">Preguntas</a>
+    </nav>
+    <div class="actions">
+      {LOGIN_URL && <a class="link-login" href={LOGIN_URL} rel="nofollow">Iniciar sesión</a>}
+      <WhatsappLink label="Más información" cls="btn-primary" />
+    </div>
+  </div>
+</header>
+
+<main id="inicio">
+  <slot />
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot foot-seo">
+      <div>
+        <a class="brand" href="/"><Image {...logoProps} />{SITE.name}</a>
+        <p style="margin-top:10px;max-width:42ch">Software para gestionar créditos, cartera y cobranza.</p>
+      </div>
+      <div>
+        <h3>Producto</h3>
+        <ul>
+          <li><a href="/#que-es">Qué es</a></li>
+          <li><a href="/#funciones">Funciones</a></li>
+          <li><a href="/#preguntas">Preguntas frecuentes</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Funciones</h3>
+        <ul class="foot-modules">
+          {FEATURES.map((f) => <li><a href={`/funciones/${f.id}/`}>{f.title}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <h3>Contacto</h3>
+        <ul>
+          <li><a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+          {LOGIN_URL && <li><a href={LOGIN_URL} rel="nofollow">Iniciar sesión</a></li>}
+        </ul>
+      </div>
+    </div>
+    <p class="foot-legal">© {new Date().getFullYear()} {SITE.name}. Todos los derechos reservados.<br />Un producto de <a href={SITE.companyUrl} target="_blank" rel="noopener noreferrer">{SITE.legalName}</a></p>
+  </div>
+</footer>
+
+<div class="wa">
+  <div class="wa-panel" id="wa-panel" role="dialog" aria-label="Contacto por WhatsApp" hidden>
+    <div class="wa-head">
+      <div class="wa-avatar"><Icon name="message" /></div>
+      <div><strong>{SITE.legalName}</strong><small>En línea - Respuesta inmediata</small></div>
+      <button class="wa-close" id="wa-close" type="button" aria-label="Cerrar chat"><Icon name="x" size={16} /></button>
+    </div>
+    <div class="wa-body">
+      <p class="wa-msg">¡Hola! Te contamos todo sobre MiGestor, nuestro software para gestionar créditos y cobranza.</p>
+      <p class="wa-query"><small>Tu consulta:</small>Estoy interesado en el software MiGestor.</p>
+      <div class="wa-meta">
+        <span><Icon name="clock" size={12} />Lun - Vie: 8AM - 6PM</span>
+        <span><Icon name="check-circle" size={12} />Respuesta garantizada</span>
+      </div>
+      <WhatsappLink label="Iniciar Chat" cls="btn-wa wa-start" size={16} />
+    </div>
+  </div>
+  <button class="wa-btn" id="wa-btn" type="button" aria-label="Abrir WhatsApp" aria-expanded="false" aria-controls="wa-panel">
+    <Icon name="message" size={26} />
+    <span class="wa-alert" aria-hidden="true">!</span>
+  </button>
+</div>
+<dialog class="lb" id="lb" aria-label="Imagen ampliada">
+  <div class="lb-bar">
+    <p id="lb-caption"></p>
+    <div class="lb-tools">
+      <button type="button" id="lb-out" aria-label="Alejar"><Icon name="minus" /></button>
+      <button type="button" id="lb-level" aria-label="Ajustar a la pantalla">100%</button>
+      <button type="button" id="lb-in" aria-label="Acercar"><Icon name="plus" /></button>
+      <button type="button" id="lb-close" aria-label="Cerrar imagen"><Icon name="x" /></button>
+    </div>
+  </div>
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt="" /></div>
+</dialog>
+<button class="to-top" id="to-top" type="button" aria-label="Volver arriba" hidden><Icon name="arrow-up" /></button>
+<script src="../scripts/landing.js"></script>
+<script src="../scripts/motion.js"></script>
+<script src="../scripts/protect.js"></script>
+</body>
+</html>

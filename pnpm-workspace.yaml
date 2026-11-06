@@ -1,0 +1,7 @@
+# Politica de seguridad de la cadena de suministro, igual que en el frontend:
+# no instalar paquetes publicados hace menos de 24 horas (1440 minutos).
+minimumReleaseAge: 1440
+
+allowBuilds:
+  esbuild: true
+  sharp: true

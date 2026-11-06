@@ -1,0 +1,33 @@
+---
+// Dibujos en alto relieve del fondo de la llamada a la acción: el oficio del producto
+// (cobros, rutas, reportes) estampado en el color de la sección.
+const wide = [
+  { name: 'coins', x: 70, y: 40, size: 150, rotate: -10 },
+  { name: 'calendar', x: 268, y: 214, size: 118, rotate: 8 },
+  { name: 'phone', x: 30, y: 262, size: 130, rotate: 12 },
+  { name: 'pin', x: 212, y: 30, size: 76, rotate: 0 },
+  { name: 'pin', x: 1138, y: 26, size: 76, rotate: 0 },
+  { name: 'chart', x: 1236, y: 28, size: 146, rotate: 6 },
+  { name: 'file', x: 1074, y: 214, size: 118, rotate: -8 },
+  { name: 'shield', x: 1296, y: 250, size: 124, rotate: -6 },
+];
+// En el celular los dibujos van en las esquinas para no competir con el texto.
+const narrow = [
+  { name: 'coins', x: -12, y: -8, size: 74, rotate: -10 },
+  { name: 'chart', x: 322, y: -6, size: 72, rotate: 6 },
+  { name: 'calendar', x: -16, y: 272, size: 70, rotate: 8 },
+  { name: 'shield', x: 330, y: 270, size: 70, rotate: -6 },
+];
+const transformOf = (m: (typeof wide)[number]) => `rotate(${m.rotate} ${m.x + m.size / 2} ${m.y + m.size / 2})`;
+---
+<svg class="cta-relief cta-relief-wide" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none">
+  <path class="cta-route" d="M250 88c120-46 190 36 150 104s-8 150 120 150h400c120 0 150-84 112-150s10-150 142-108" />
+  <g class="cta-marks">
+    {wide.map((m) => <use href={`#i-${m.name}`} width={m.size} height={m.size} x={m.x} y={m.y} transform={transformOf(m)} />)}
+  </g>
+</svg>
+<svg class="cta-relief cta-relief-narrow" viewBox="0 0 390 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none">
+  <g class="cta-marks">
+    {narrow.map((m) => <use href={`#i-${m.name}`} width={m.size} height={m.size} x={m.x} y={m.y} transform={transformOf(m)} />)}
+  </g>
+</svg>

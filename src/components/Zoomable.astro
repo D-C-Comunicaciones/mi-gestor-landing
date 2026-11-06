@@ -1,0 +1,52 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+import type { Shot } from '../data/content';
+
+interface Props {
+  shot: Shot;
+  /** Clases del enlace; por defecto la miniatura estándar. */
+  cls?: string;
+  /** La imagen repite información visible: alt vacío. */
+  decorative?: boolean;
+  /** Imagen principal de la página (LCP). */
+  priority?: boolean;
+  /** Se carga de inmediato, sin ser la principal. */
+  eager?: boolean;
+  sizes?: string;
+  /** false: imagen fija, sin enlace ni visor. */
+  zoom?: boolean;
+}
+
+const { shot, cls, decorative = false, priority = false, eager = false, sizes, zoom = true } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/landing/*.jpg', { eager: true });
+const asset = images[`/src/assets${shot.src}`];
+if (!asset) throw new Error(`No existe la captura ${shot.src} en src/assets/landing`);
+const meta = asset.default;
+
+const full = await getImage({ src: meta, format: 'webp', quality: 85 });
+const widths = (shot.phone ? [195, 390] : [480, 800, 1200, 1440]).filter((w) => w <= meta.width);
+const linkClass = `${cls ?? `shot${shot.phone ? ' shot-phone' : ''}`}${shot.phone ? ' device' : ''}`;
+const defaultSizes = shot.phone ? '170px' : '(max-width: 860px) 100vw, 640px';
+const Tag = zoom ? 'a' : 'span';
+const wrapper = zoom
+  ? { class: `${linkClass} js-zoom`, href: full.src, 'data-caption': shot.alt, 'aria-label': `Ampliar: ${shot.alt}` }
+  : { class: linkClass };
+---
+<Tag {...wrapper}>
+  {shot.phone ? (
+    <span class="device-body">
+      <span class="device-screen">
+        <span class="device-status" aria-hidden="true">
+          <span>9:41</span>
+          <i class="device-island"></i>
+          <svg viewBox="0 0 34 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".8" /><rect x="4.5" y="5.5" width="3" height="6.5" rx=".8" /><rect x="9" y="3" width="3" height="9" rx=".8" /><rect x="16" y="1.5" width="16" height="9.5" rx="2.6" fill="none" stroke="currentColor" /><rect x="17.6" y="3.1" width="10.5" height="6.3" rx="1.3" /><rect x="32.6" y="4.6" width="1.4" height="3.4" rx=".7" /></svg>
+        </span>
+        <Image src={meta} alt={decorative ? '' : shot.alt} widths={widths} sizes={sizes ?? defaultSizes} format="webp" quality={80} priority={priority} loading={priority || eager ? 'eager' : 'lazy'} />
+      </span>
+    </span>
+  ) : (
+    <Image src={meta} alt={decorative ? '' : shot.alt} widths={widths} sizes={sizes ?? defaultSizes} format="webp" quality={80} priority={priority} loading={priority || eager ? 'eager' : 'lazy'} />
+  )}
+</Tag>

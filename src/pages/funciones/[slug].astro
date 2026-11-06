@@ -1,0 +1,92 @@
+---
+import Base from '../../layouts/Base.astro';
+import CtaRelief from '../../components/CtaRelief.astro';
+import FaqList from '../../components/FaqList.astro';
+import Icon from '../../components/Icon.astro';
+import WhatsappLink from '../../components/WhatsappLink.astro';
+import Zoomable from '../../components/Zoomable.astro';
+import { FAQS, FEATURES } from '../../data/content';
+import { FEATURE_SEO } from '../../data/feature-seo';
+import { MODULE_KEYWORDS } from '../../data/keywords';
+import { breadcrumbSchema, faqSchema, graph, organizationSchema, softwareSchema, webPageSchema, websiteSchema } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return FEATURES.map((feature) => ({ params: { slug: feature.id }, props: { feature } }));
+}
+
+const { feature } = Astro.props;
+const seo = FEATURE_SEO[feature.id];
+if (!seo) throw new Error(`Falta el SEO del módulo ${feature.id} en feature-seo.ts`);
+
+const site = Astro.site!;
+const path = `/funciones/${feature.id}/`;
+const faqs = seo.faqs.map((i) => FAQS[i]);
+const others = FEATURES.filter((f) => f.id !== feature.id);
+const jsonLd = graph([
+  organizationSchema(site),
+  websiteSchema(site),
+  softwareSchema(site, 'Plataforma para empresas de crédito: clientes, créditos, cobranza, cobradores en ruta, gastos, reportes, auditoría y permisos en un solo lugar.'),
+  webPageSchema(site, path, seo.title, seo.description),
+  breadcrumbSchema(site, [
+    { name: 'Inicio', path: '/' },
+    { name: 'Funciones', path: '/#funciones' },
+    { name: feature.title, path },
+  ]),
+  ...(faqs.length ? [faqSchema(faqs)] : []),
+]);
+---
+<Base title={seo.title} description={seo.description} keywords={MODULE_KEYWORDS[feature.id]} jsonLd={jsonLd}>
+  <section class="module-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Ruta de navegación">
+        <ol>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/#funciones">Funciones</a></li>
+          <li aria-current="page">{feature.title}</li>
+        </ol>
+      </nav>
+      <div class="module-grid">
+        <div>
+          <h1>{seo.h1}</h1>
+          <p class="lead">{seo.answer}</p>
+          <WhatsappLink label="Quiero más información" cls="btn-primary btn-lg" />
+        </div>
+        <div class="shots">
+          {feature.shots.map((s, i) => <Zoomable shot={s} priority={i === 0} />)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tinted module-includes">
+    <div class="wrap">
+      <h2>{feature.heading}</h2>
+      <ul>{feature.items.map((item) => <li><Icon name="check-circle" size={18} /><span>{item}</span></li>)}</ul>
+    </div>
+  </section>
+
+  {faqs.length > 0 && (
+    <section>
+      <div class="wrap center module-faq">
+        <h2>Preguntas sobre {feature.title.toLowerCase()}</h2>
+        <FaqList faqs={faqs} />
+      </div>
+    </section>
+  )}
+
+  <section class="related" style="padding-top:0">
+    <div class="wrap center">
+      <h2>Otras funciones de MiGestor</h2>
+      <ul>{others.map((f) => <li><a href={`/funciones/${f.id}/`}>{f.title}</a></li>)}</ul>
+    </div>
+  </section>
+
+  <section class="cta">
+    <CtaRelief />
+    <div class="wrap center">
+      <h2>Conoce MiGestor para tu operación</h2>
+      <p class="lead">Escríbenos por WhatsApp y te contamos todo lo que el producto puede hacer por tu negocio.</p>
+      <WhatsappLink label="Escribir por WhatsApp" cls="btn-wa btn-lg" />
+    </div>
+  </section>
+</Base>
